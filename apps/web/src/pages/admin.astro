@@ -49,10 +49,10 @@ const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
       </nav>
       <div class="sidebar-spacer"></div>
       <div class="sidebar-identity"><span class="avatar">A</span><span><b>Administrador</b><small id="userEmail">—</small></span></div>
-      <button class="logout-button" id="signOut" type="button">Cerrar sesión</button>
+      <button class="logout-button" id="signOut" data-sign-out type="button">Cerrar sesión</button>
     </aside>
     <div class="main-area">
-      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">C</span><strong>CAZAMI <span>ACCESS</span></strong></div><div class="topbar-title">PANEL ADMINISTRATIVO</div><div class="topbar-right"><span class="connection-dot"></span><span>Conectado a Supabase</span><button class="icon-button" id="refresh" title="Actualizar fiestas" aria-label="Actualizar fiestas">↻</button></div></header>
+      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">C</span><strong>CAZAMI <span>ACCESS</span></strong></div><div class="topbar-title">PANEL ADMINISTRATIVO</div><div class="topbar-right"><span class="connection-dot"></span><span>Conectado a Supabase</span><button class="icon-button" id="refresh" title="Actualizar fiestas" aria-label="Actualizar fiestas">↻</button><button type="button" class="mobile-logout" data-sign-out aria-label="Cerrar sesión">Salir</button></div></header>
       <div class="content">
         <div id="dashboardMessage" class="message hidden" role="status" aria-live="polite"></div>
         <section id="tabEvents" class="tab-panel">
@@ -96,7 +96,7 @@ const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
 
         <section id="tabSettings" class="tab-panel hidden">
           <div class="page-heading"><div><div class="eyebrow">TU SEGURIDAD</div><h1>Mi cuenta</h1><p>Protege la administración de todas tus fiestas.</p></div></div>
-          <section class="section-card settings-card"><h2>Acceso del propietario</h2><p>Utiliza tu usuario y contraseña internos para entrar. Aquí puedes cambiar tu contraseña de administrador.</p><form id="passwordForm" class="form-stack"><label>Contraseña nueva<input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Mínimo 12 caracteres"/></label><button class="primary-button" type="submit">Guardar contraseña</button></form><div class="info-note">La contraseña no se guarda en este sitio: Supabase Auth la gestiona de forma segura. Recomendamos una contraseña nueva y única.</div></section>
+          <section class="section-card settings-card"><h2>Sesión actual</h2><p>Cierra tu sesión administrativa y vuelve al acceso por código de fiesta.</p><button type="button" class="account-logout" data-sign-out>Cerrar sesión</button></section><section class="section-card settings-card"><h2>Acceso del propietario</h2><p>Utiliza tu usuario y contraseña internos para entrar. Aquí puedes cambiar tu contraseña de administrador.</p><form id="passwordForm" class="form-stack"><label>Contraseña nueva<input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Mínimo 12 caracteres"/></label><button class="primary-button" type="submit">Guardar contraseña</button></form><div class="info-note">La contraseña no se guarda en este sitio: Supabase Auth la gestiona de forma segura. Recomendamos una contraseña nueva y única.</div></section>
           <section class="section-card settings-card"><h2>Depuración segura</h2><p>Los pases se eliminan automáticamente cuando llega la fecha de caducidad elegida y la fiesta ya terminó. También puedes depurarlos manualmente desde el listado una vez que la fiesta haya terminado.</p><p class="helper-text">Se conservan el folio, nombre, URL y un resumen agregado. Los registros de acceso quedan disponibles para auditoría sin depender del nombre de la familia.</p></section>
         </section>
       </div>

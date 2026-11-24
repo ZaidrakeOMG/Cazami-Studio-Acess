@@ -140,7 +140,24 @@ function connect(){
   }catch(error){message('authMessage',error instanceof Error?error.message:'No se pudo iniciar sesión.','error')}
   finally{btn.disabled=false;btn.textContent='Iniciar sesión →'}
  });
- $('signOut').addEventListener('click',async()=>{if(!sb)return;await sb.auth.signOut();events=[];await authState()});
+ let signingOut=false;
+ document.querySelectorAll<HTMLButtonElement>('[data-sign-out]').forEach(button=>button.addEventListener('click',async()=>{
+  if(!sb||signingOut)return;
+  signingOut=true;
+  const buttons=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-sign-out]'));
+  buttons.forEach(b=>b.disabled=true);
+  try{
+   const {error}=await sb.auth.signOut({scope:'local'});
+   if(error)throw error;
+   ++sessionRefresh;
+   events=[];
+   show('dashboard',false);
+   window.location.replace('/');
+  }catch(e){
+   message('dashboardMessage','No se pudo cerrar sesión: '+(e instanceof Error?e.message:String(e)),'error');
+   window.scrollTo({top:0,behavior:'smooth'});
+  }finally{signingOut=false;buttons.forEach(b=>b.disabled=false);}
+ }));
  $('refresh').addEventListener('click',()=>void reload());
  $('searchEvents').addEventListener('input',render);
  document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.addEventListener('click',()=>changeTab(b.dataset.tab||'events')));
@@ -187,6 +204,7 @@ function connect(){
 async function start(){
  if(!sb){show('bootScreen',false);show('authScreen');message('authMessage','No se configuraron PUBLIC_SUPABASE_URL y PUBLIC_SUPABASE_PUBLISHABLE_KEY en Vercel.','error');return}
  connect();
+ window.addEventListener('pageshow',event=>{if(event.persisted)void authState();});
  sb.auth.onAuthStateChange(()=>{setTimeout(()=>{void authState()},0)});
  await authState();
  show('bootScreen',false);
