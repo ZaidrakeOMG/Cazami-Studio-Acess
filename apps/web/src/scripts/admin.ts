@@ -6,7 +6,7 @@ const $ = (id: string) => document.getElementById(id)!;
 const sb = URL && KEY ? createClient(URL, KEY, {auth: {autoRefreshToken:true, persistSession:true,detectSessionInUrl:true,flowType:'implicit'}}) : null;
 type EventRecord = {
   id:string;folio:string;event_name:string;client_name:string;event_type:string;invitation_url:string;
-  event_date:string|null;status:string;max_passes:number;max_people:number;retention_days:number;
+  event_date:string|null;status:string;max_passes:number;max_people:number;retention_days:number;expires_on:string|null;
   historical_passes:number;historical_people:number;historical_entries:number;cleaned_at:string|null;
 };
 let events:EventRecord[]=[];
@@ -26,7 +26,10 @@ function localToday(){const date=new Date();const parts=new Intl.DateTimeFormat(
 function parseForm(form:HTMLFormElement){const f=new FormData(form);const text=(k:string)=>String(f.get(k)??'').trim();const url=text('invitation_url');let parsed:globalThis.URL;
   try{parsed=new globalThis.URL(url);if(parsed.protocol!=='https:')throw Error('HTTPS requerido')}catch{throw Error('La invitación debe tener una dirección HTTPS válida.')}
   const event_date=text('event_date')||null;
-  return {event_name:text('event_name'),client_name:text('client_name'),event_type:text('event_type'),invitation_url:parsed.href,event_date,max_passes:Number(text('max_passes')),max_people:Number(text('max_people')),retention_days:Number(text('retention_days'))};
+  const expires_on=text('expires_on');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(expires_on))throw Error('Selecciona la fecha de caducidad.');
+  if(event_date && expires_on<=event_date)throw Error('La caducidad debe ser posterior a la fecha de la fiesta.');
+  return {event_name:text('event_name'),client_name:text('client_name'),event_type:text('event_type'),invitation_url:parsed.href,event_date,max_passes:Number(text('max_passes')),max_people:Number(text('max_people')),expires_on};
 }
 async function authState(){
  if(!sb)return;
@@ -47,15 +50,16 @@ async function authState(){
 }
 async function reload(){
  if(!sb)return;
- const {data,error}=await sb.from('cazami_events').select('id,folio,event_name,client_name,event_type,invitation_url,event_date,status,max_passes,max_people,retention_days,historical_passes,historical_people,historical_entries,cleaned_at').order('created_at',{ascending:false});
+ const {data,error}=await sb.from('cazami_events').select('id,folio,event_name,client_name,event_type,invitation_url,event_date,status,max_passes,max_people,retention_days,expires_on,historical_passes,historical_people,historical_entries,cleaned_at').order('created_at',{ascending:false});
  if(error){message('dashboardMessage','Error al consultar eventos: '+error.message,'error');return;}
  events=(data??[]) as EventRecord[];
  clearMessage('dashboardMessage');
  render();
 }
 function badge(e:EventRecord){
- const clazz=e.cleaned_at?'finished':e.status;
- return '<span class="event-status '+safe(clazz)+'">'+(e.cleaned_at?'Pases depurados':safe(statusNames[e.status]??e.status))+'</span>';
+ const expired=!!(e.expires_on && e.expires_on<=localToday());
+ const clazz=e.cleaned_at||expired?'finished':e.status;
+ return '<span class="event-status '+safe(clazz)+'">'+(e.cleaned_at?'Pases depurados':expired?'Caducada':safe(statusNames[e.status]??e.status))+'</span>';
 }
 function item(e:EventRecord,historical=false){
  const isPast=!!(e.event_date && e.event_date<localToday());
@@ -64,7 +68,7 @@ function item(e:EventRecord,historical=false){
  const canEdit=!cleaned;
  return '<article class="event-card">'+
  '<div class="event-main"><div><div class="event-title">'+safe(e.event_name)+'</div><div class="event-client">'+safe(e.client_name||e.event_type)+'</div></div><span class="folio-chip">'+safe(e.folio)+'</span></div>'+
- '<div class="event-meta">'+badge(e)+'<span>'+safe(dateText(e.event_date))+'</span><span>· '+safe(String(e.max_people))+' invitados máx.</span></div>'+
+ '<div class="event-meta">'+badge(e)+'<span>'+safe(dateText(e.event_date))+'</span><span>· Caduca: '+safe(e.expires_on?dateText(e.expires_on):'Sin definir')+'</span><span>· '+safe(String(e.max_people))+' invitados máx.</span></div>'+
  '<div class="event-link"><span>↗</span><a href="'+safe(safeLink(e.invitation_url))+'" target="_blank" rel="noopener noreferrer" title="Abrir invitación">'+safe(e.invitation_url)+'</a></div>'+
  (historical?'<p class="helper-text">Pases históricos: '+(e.historical_passes||0)+' · Personas: '+(e.historical_people||0)+' · Entradas: '+(e.historical_entries||0)+(cleaned?' · Depurados':'')+'</p>':'')+
  '<div class="event-actions">'+(canEdit?'<button class="action" data-action="edit" data-id="'+safe(e.id)+'" type="button">Editar</button>':'')+
@@ -75,13 +79,13 @@ function item(e:EventRecord,historical=false){
 }
 function render(){
  $('statAll').textContent=String(events.length);
- $('statActive').textContent=String(events.filter(e=>e.status==='active').length);
- $('statArchived').textContent=String(events.filter(e=>e.status==='finished'||e.cleaned_at).length);
+ $('statActive').textContent=String(events.filter(e=>e.status==='active'&&(!e.expires_on||e.expires_on>localToday())).length);
+ $('statArchived').textContent=String(events.filter(e=>e.status==='finished'||e.cleaned_at||!!(e.expires_on&&e.expires_on<=localToday())).length);
  const term=($('searchEvents') as HTMLInputElement).value.toLocaleLowerCase('es-MX').trim();
  const matched=events.filter(e=>(e.folio+' '+e.event_name+' '+e.client_name+' '+e.invitation_url).toLocaleLowerCase('es-MX').includes(term));
  $('listCount').textContent=matched.length+' '+(matched.length===1?'fiesta':'fiestas');
  $('eventList').innerHTML=matched.length?matched.map(e=>item(e)).join(''):'<p class="empty-msg">Aún no hay fiestas con esa búsqueda.</p>';
- const historic=events.filter(e=>e.status==='finished'||!!e.cleaned_at);
+ const historic=events.filter(e=>e.status==='finished'||!!e.cleaned_at||!!(e.expires_on&&e.expires_on<=localToday()));
  $('historicalList').innerHTML=historic.length?historic.map(e=>item(e,true)).join(''):'<p class="empty-msg">Todavía no existen eventos finalizados.</p>';
 }
 function changeTab(tab:string){
@@ -93,7 +97,7 @@ function changeTab(tab:string){
 function openEditor(id:string){
  const e=events.find(x=>x.id===id);if(!e||e.cleaned_at)return;
  const f=$('editEventForm') as HTMLFormElement;
- for(const name of ['id','event_name','client_name','event_type','invitation_url','status','max_passes','max_people','retention_days']){
+ for(const name of ['id','event_name','client_name','event_type','invitation_url','status','max_passes','max_people','expires_on']){
   (f.elements.namedItem(name) as HTMLInputElement|HTMLSelectElement).value=String((e as unknown as Record<string,unknown>)[name]??'');
  }
  (f.elements.namedItem('event_date') as HTMLInputElement).value=e.event_date??'';

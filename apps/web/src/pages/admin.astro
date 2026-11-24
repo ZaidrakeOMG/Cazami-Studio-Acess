@@ -75,8 +75,8 @@ const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
                   <label>Máx. pases<input name="max_passes" type="number" min="1" max="100000" value="100" required/></label>
                   <label>Máx. personas<input name="max_people" type="number" min="1" max="1000000" value="300" required/></label>
                 </div>
-                <label>Limpiar pases después de<select name="retention_days"><option value="7">7 días</option><option value="15">15 días</option><option value="30" selected>30 días</option><option value="60">60 días</option><option value="90">90 días</option></select></label>
-                <p class="info-note">El folio queda guardado para siempre. Únicamente los pases temporales se depuran al vencer el plazo.</p>
+                <label>Fecha de caducidad <span class="required">*</span><input name="expires_on" type="date" required /></label>
+                <p class="info-note">El código deja de dar acceso desde la fecha elegida. El folio se conserva en el historial. Los pases se depuran automáticamente si la fecha de la fiesta está definida.</p>
                 <button type="submit" class="primary-button" id="createButton">Crear fiesta y asignar folio <span aria-hidden="true">→</span></button>
               </form>
             </section>
@@ -97,7 +97,7 @@ const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
         <section id="tabSettings" class="tab-panel hidden">
           <div class="page-heading"><div><div class="eyebrow">TU SEGURIDAD</div><h1>Mi cuenta</h1><p>Protege la administración de todas tus fiestas.</p></div></div>
           <section class="section-card settings-card"><h2>Acceso del propietario</h2><p>Utiliza tu usuario y contraseña internos para entrar. Aquí puedes cambiar tu contraseña de administrador.</p><form id="passwordForm" class="form-stack"><label>Contraseña nueva<input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Mínimo 12 caracteres"/></label><button class="primary-button" type="submit">Guardar contraseña</button></form><div class="info-note">La contraseña no se guarda en este sitio: Supabase Auth la gestiona de forma segura. Recomendamos una contraseña nueva y única.</div></section>
-          <section class="section-card settings-card"><h2>Depuración segura</h2><p>Los pases se eliminan automáticamente cuando vence el plazo elegido después de la fecha del evento. También puedes depurarlos manualmente desde el listado una vez que la fiesta haya terminado.</p><p class="helper-text">Se conservan el folio, nombre, URL y un resumen agregado. Los registros de acceso quedan disponibles para auditoría sin depender del nombre de la familia.</p></section>
+          <section class="section-card settings-card"><h2>Depuración segura</h2><p>Los pases se eliminan automáticamente cuando llega la fecha de caducidad elegida y la fiesta ya terminó. También puedes depurarlos manualmente desde el listado una vez que la fiesta haya terminado.</p><p class="helper-text">Se conservan el folio, nombre, URL y un resumen agregado. Los registros de acceso quedan disponibles para auditoría sin depender del nombre de la familia.</p></section>
         </section>
       </div>
     </div>
@@ -115,7 +115,7 @@ const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
       <label>Fecha de la fiesta<input name="event_date" type="date"/></label>
       <label>Estado<select name="status"><option value="draft">En preparación</option><option value="active">Activa</option><option value="paused">Suspendida</option><option value="finished">Finalizada</option></select></label>
       <div class="inline-fields"><label>Máx. pases<input name="max_passes" type="number" min="1" max="100000"/></label><label>Máx. personas<input name="max_people" type="number" min="1" max="1000000"/></label></div>
-      <label>Depurar pases después de<select name="retention_days"><option value="7">7 días</option><option value="15">15 días</option><option value="30">30 días</option><option value="60">60 días</option><option value="90">90 días</option></select></label>
+      <label>Fecha de caducidad<input name="expires_on" type="date" required /></label>
       <button type="submit" class="primary-button">Guardar cambios</button>
     </form>
   </dialog>
