@@ -1,0 +1,140 @@
+name: Cazami Access APK
+on:
+  push:
+    branches: [android-apk]
+    paths: ['.github/workflows/cazami-android.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build Android project
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          mkdir -p android/app/src/main/java/com/cazami/access android/app/src/main/res/drawable
+          cd android
+          cat > settings.gradle <<'EOF'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name = 'CazamiAccess'
+          include ':app'
+          EOF
+          cat > build.gradle <<'EOF'
+          plugins { id 'com.android.application' version '8.7.3' apply false }
+          EOF
+          cat > app/build.gradle <<'EOF'
+          plugins { id 'com.android.application' }
+          android {
+            namespace 'com.cazami.access'
+            compileSdk 35
+            defaultConfig {
+              applicationId 'com.cazami.access'
+              minSdk 23
+              targetSdk 34
+              versionCode 1
+              versionName '1.0'
+            }
+          }
+          EOF
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <uses-permission android:name="android.permission.CAMERA"/>
+            <uses-feature android:name="android.hardware.camera.any" android:required="false"/>
+            <application android:label="Cazami Access" android:icon="@drawable/logo" android:theme="@android:style/Theme.Material.NoActionBar" android:usesCleartextTraffic="false" android:allowBackup="false">
+              <activity android:name=".MainActivity" android:exported="true">
+                <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+              </activity>
+            </application>
+          </manifest>
+          EOF
+          cat > app/src/main/res/drawable/logo.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+            <path android:fillColor="#080808" android:pathData="M0,0H108V108H0Z"/>
+            <path android:fillColor="#FFFFFF" android:pathData="M62,27 C50,15 21,24 21,47 C21,69 45,81 62,63 L61,60 C48,73 31,65 31,47 C31,29 47,21 60,31 L62,36Z M49,42 H84 L48,83 H72 Q80,82 84,73 L83,85 H40 L76,44 H60 Q53,44 49,52Z"/>
+          </vector>
+          EOF
+          cat > app/src/main/java/com/cazami/access/MainActivity.java <<'EOF'
+          package com.cazami.access;
+          import android.Manifest;
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.content.Intent;
+          import android.content.pm.PackageManager;
+          import android.net.Uri;
+          import android.webkit.*;
+          import android.widget.Toast;
+
+          public class MainActivity extends Activity {
+            private static final String HOST="cazami-studio-access.vercel.app";
+            private WebView web;
+            private PermissionRequest pending;
+            private boolean trusted(Uri u) { return u != null && "https".equalsIgnoreCase(u.getScheme()) && HOST.equalsIgnoreCase(u.getHost()) && (u.getPort()==-1 || u.getPort()==443); }
+            @Override public void onCreate(Bundle b) {
+              super.onCreate(b);
+              web=new WebView(this);
+              setContentView(web);
+              web.getSettings().setJavaScriptEnabled(true);
+              web.getSettings().setDomStorageEnabled(true);
+              web.getSettings().setAllowFileAccess(false);
+              web.getSettings().setAllowContentAccess(false);
+              web.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+              web.getSettings().setMediaPlaybackRequiresUserGesture(true);
+              CookieManager.getInstance().setAcceptCookie(true);
+              CookieManager.getInstance().setAcceptThirdPartyCookies(web,false);
+              web.setWebViewClient(new WebViewClient(){
+                @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r){
+                  if(!r.isForMainFrame()) return false;
+                  Uri u=r.getUrl();
+                  if(trusted(u)) return false;
+                  if("https".equalsIgnoreCase(u.getScheme())) {
+                    try{startActivity(new Intent(Intent.ACTION_VIEW,u));}catch(Exception e){Toast.makeText(MainActivity.this,"No se pudo abrir el enlace",Toast.LENGTH_SHORT).show();}
+                  }
+                  return true;
+                }
+              });
+              web.setWebChromeClient(new WebChromeClient(){
+                @Override public void onPermissionRequest(PermissionRequest req){
+                  runOnUiThread(()->{
+                    if(!trusted(req.getOrigin()) || !java.util.Arrays.asList(req.getResources()).contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE)){req.deny();return;}
+                    if(checkSelfPermission(Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED){req.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});return;}
+                    if(pending!=null)pending.deny();
+                    pending=req;
+                    requestPermissions(new String[]{Manifest.permission.CAMERA},7);
+                  });
+                }
+                @Override public void onPermissionRequestCanceled(PermissionRequest req){if(pending==req)pending=null;}
+              });
+              if(b==null || web.restoreState(b)==null)web.loadUrl("https://"+HOST+"/");
+            }
+            @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grants){
+              super.onRequestPermissionsResult(requestCode,permissions,grants);
+              if(requestCode==7 && pending!=null){
+                if(grants.length>0 && grants[0]==PackageManager.PERMISSION_GRANTED && trusted(pending.getOrigin()))pending.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});else pending.deny();
+                pending=null;
+              }
+            }
+            @Override public void onSaveInstanceState(Bundle out){web.saveState(out);super.onSaveInstanceState(out);}
+            @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
+            @Override protected void onDestroy(){if(pending!=null){pending.deny();pending=null;}web.destroy();super.onDestroy();}
+          }
+          EOF
+          gradle --no-daemon assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../Cazami-Access.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify ../Cazami-Access.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cazami-Access-APK
+          path: Cazami-Access.apk
+          if-no-files-found: error
