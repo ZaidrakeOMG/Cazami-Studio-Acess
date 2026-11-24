@@ -72,6 +72,7 @@ function item(e:EventRecord,historical=false){
  '<div class="event-link"><span>↗</span><a href="'+safe(safeLink(e.invitation_url))+'" target="_blank" rel="noopener noreferrer" title="Abrir invitación">'+safe(e.invitation_url)+'</a></div>'+
  (historical?'<p class="helper-text">Pases históricos: '+(e.historical_passes||0)+' · Personas: '+(e.historical_people||0)+' · Entradas: '+(e.historical_entries||0)+(cleaned?' · Depurados':'')+'</p>':'')+
  '<div class="event-actions">'+(canEdit?'<button class="action" data-action="edit" data-id="'+safe(e.id)+'" type="button">Editar</button>':'')+
+ (canEdit&&e.status!=='finished'?'<button class="action" data-action="operator" data-id="'+safe(e.id)+'" type="button">Clave de acceso</button>':'')+
  (canEdit&&e.status!=='finished'?'<button class="action" data-action="finish" data-id="'+safe(e.id)+'" type="button">Finalizar</button>':'')+
  (canClean?'<button class="action warn" data-action="clean" data-id="'+safe(e.id)+'" type="button">Depurar pases</button>':'')+
  (cleaned?'<span class="action" style="text-align:center;cursor:default">Folio conservado</span>':'')+
@@ -107,6 +108,12 @@ function openEditor(id:string){
 async function doAction(action:string,id:string){
  const e=events.find(x=>x.id===id);if(!e||!sb)return;
  if(action==='edit'){openEditor(id);return}
+ if(action==='operator'){
+  if(!window.confirm('Generar una nueva clave de acceso para '+e.folio+'? Esto invalidará las claves anteriores y las sesiones del personal.'))return;
+  const {data,error}=await sb.rpc('cazami_rotate_operator_code',{p_event_id:id});
+  if(error||!data){message('dashboardMessage','No se pudo generar la clave de acceso.','error');return;}
+  window.prompt('Comparte esta clave solo con el personal de '+e.folio+'. Guárdala: no se mostrará nuevamente.',String(data));return;
+ }
  if(action==='finish'){
   if(!window.confirm('¿Marcar '+e.folio+' como finalizada? Podrás consultar su historial.'))return;
   const {error}=await sb.from('cazami_events').update({status:'finished'}).eq('id',id);
