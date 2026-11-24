@@ -21,9 +21,7 @@ form.addEventListener('submit',async e=>{
   const response=await fetch('/api/event/'+encodeURIComponent(folio),{cache:'no-store'});
   const data=await response.json();
   if(!response.ok)throw Error(data.error||'No se encontró el código.');
-  out.classList.remove('hidden');
-  out.innerHTML='<div class="folio">'+escapeHtml(data.folio)+'</div><h2>'+escapeHtml(data.event_name)+'</h2><div class="status">'+escapeHtml(data.status_label)+'</div>';
-  if(data.invitation_url){const a=document.createElement('a');a.textContent='Abrir invitación';a.href=data.invitation_url;a.target='_blank';a.rel='noopener noreferrer';out.append(a)}
+  window.location.assign('/event/'+encodeURIComponent(folio));
  }catch(e){error(e.message||'No se pudo consultar el evento.')}
  finally{button.disabled=false;button.textContent='Ingresar'}
 });
