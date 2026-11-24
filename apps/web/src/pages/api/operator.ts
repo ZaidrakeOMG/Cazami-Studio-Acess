@@ -17,10 +17,11 @@ export const POST:APIRoute=async({request,cookies})=>{
  if(!url||!secret)return json({error:'Servicio no configurado'},503);
  const token=typeof body.token==='string'?body.token:null;
  const key=typeof body.requestKey==='string'?body.requestKey:null;
- if(action==='register'&&(!key||!/^[0-9a-f-]{36}$/.test(key)))return json({error:'Solicitud inválida'},400);
+ const people=body.people;
+ if(action==='register'&&(!key||!/^[0-9a-f-]{36}$/.test(key)||!Number.isInteger(people)||people<1||people>1000))return json({error:'Indica una cantidad válida de personas. Actualiza la aplicación si no aparece el selector.'},400);
  try{
  const sb=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
- const {data,error}=await sb.rpc('cazami_folio_access',{p_folio:folio,p_action:action,p_token:token,p_request:key,p_device:device});
+ const {data,error}=await sb.rpc('cazami_folio_access_v2',{p_folio:folio,p_action:action,p_token:token,p_request:key,p_device:device,p_people:action==='register'?people:null});
  if(error||!data)return json({error:'No se pudo consultar el evento'},503);
  if(action==='list'&&data.status==='ok')cookies.set(name,device,opts);
  return json(data);
