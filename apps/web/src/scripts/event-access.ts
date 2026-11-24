@@ -11,15 +11,43 @@ let passes:Pass[]=[];let controls:{stop:()=>void}|null=null;let generation=0,bus
 let available=0,pendingCount:number|null=null;
 const qty=el('peopleNow') as HTMLInputElement;
 function quantityState(){const n=Number(qty.value),valid=qty.value!==''&&Number.isInteger(n)&&n>=1&&n<=available;btn('register').disabled=busy||!valid;qty.disabled=pendingCount!==null;btn('minus').disabled=pendingCount!==null||n<=1;btn('plus').disabled=pendingCount!==null||n>=available;el('quantityHint').textContent='Máximo disponible: '+available+(valid?'':qty.value?' · Ingresa un número válido':'');}
+let guestFilter='all';
+const normalize=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es-MX');
 function render(){
- const total=passes.filter(p=>p.status==='active').reduce((n,p)=>n+p.max_people,0),entered=passes.reduce((n,p)=>n+p.used_people,0);
- el('total').textContent=String(total);el('entered').textContent=String(entered);el('remaining').textContent=String(Math.max(0,total-entered));
- const q=(el('search') as HTMLInputElement).value.trim().toLocaleLowerCase('es-MX');const list=el('list');list.replaceChildren();
- for(const p of passes.filter(p=>(p.family_name+' '+p.pass_number).toLocaleLowerCase('es-MX').includes(q))){
- const row=document.createElement('div');row.className='guest';const left=document.createElement('div'),name=document.createElement('b'),info=document.createElement('small'),state=document.createElement('span');
- name.textContent=p.family_name;info.textContent='Pase '+String(p.pass_number).padStart(3,'0')+' · '+p.max_people+' personas';left.append(name,info);const progress=document.createElement('div');progress.className='guest-progress';const fill=document.createElement('span');fill.style.width=String(Math.min(100,p.used_people/Math.max(1,p.max_people)*100))+'%';progress.append(fill);left.append(progress);state.className='state'+(p.used_people>=p.max_people?' done':p.used_people>0?' partial':'');state.textContent=p.status!=='active'?'Cancelado':p.used_people>=p.max_people?'Completo':p.used_people>0?p.used_people+'/'+p.max_people+' ingresaron':'Pendiente';const avatar=document.createElement('span');avatar.className='avatar';avatar.textContent=p.family_name.split(/\s+/).slice(0,2).map(x=>x.charAt(0).toUpperCase()).join('');left.className='guest-info';row.append(avatar,left,state);list.append(row);
- }if(!list.children.length){const p=document.createElement('p');p.textContent='No hay invitados en esta lista.';list.append(p);}
+ const active=passes.filter(p=>p.status==='active');
+ const total=active.reduce((n,p)=>n+p.max_people,0),entered=passes.reduce((n,p)=>n+p.used_people,0),remaining=active.reduce((n,p)=>n+Math.max(0,p.max_people-p.used_people),0);
+ el('total').textContent=String(total);el('entered').textContent=String(entered);el('remaining').textContent=String(remaining);
+ const q=normalize((el('search') as HTMLInputElement).value.trim());const list=el('list');list.replaceChildren();
+ const filtered=passes.filter(p=>{
+  if(!normalize(p.family_name+' '+p.pass_number+' '+String(p.pass_number).padStart(3,'0')).includes(q))return false;
+  if(guestFilter==='available')return p.status==='active'&&p.used_people<p.max_people;
+  if(guestFilter==='complete')return p.status==='active'&&p.used_people>=p.max_people;
+  return true;
+ });
+ el('guestCount').textContent=filtered.length+' de '+passes.length+(passes.length===1?' pase':' pases');
+ for(const p of filtered){
+  const canceled=p.status!=='active',remaining=Math.max(0,p.max_people-p.used_people),available=canceled?0:remaining;
+  const kind=canceled?'cancelled':remaining===0?'complete':p.used_people>0?'partial':'pending';
+  const row=document.createElement('article');row.className='guest guest-'+kind;
+  const avatar=document.createElement('span');avatar.className='avatar';avatar.setAttribute('aria-hidden','true');avatar.textContent=p.family_name.trim().split(/\s+/).slice(0,2).map(x=>x.charAt(0).toUpperCase()).join('');
+  const left=document.createElement('div');left.className='guest-info';
+  const name=document.createElement('b');name.textContent=p.family_name;
+  const info=document.createElement('small');info.textContent='Pase '+String(p.pass_number).padStart(3,'0')+' · '+p.used_people+' de '+p.max_people+' ingresaron';
+  const progress=document.createElement('div');progress.className='guest-progress';progress.setAttribute('role','progressbar');progress.setAttribute('aria-label','Personas que ingresaron');progress.setAttribute('aria-valuemin','0');progress.setAttribute('aria-valuemax',String(p.max_people));progress.setAttribute('aria-valuenow',String(p.used_people));
+  const fill=document.createElement('span');fill.style.width=String(Math.min(100,p.used_people/Math.max(1,p.max_people)*100))+'%';progress.append(fill);left.append(name,info,progress);
+  const right=document.createElement('div');right.className='guest-capacity';
+  const capacity=document.createElement('strong');capacity.className='capacity-value';capacity.textContent=available+'/'+p.max_people;
+  const label=document.createElement('small');label.className='capacity-label';label.textContent='Disponibles';
+  const state=document.createElement('span');state.className='guest-state';state.textContent=canceled?'Cancelado':remaining===0?'Completo':p.used_people>0?'Parcial':'Pendiente';
+  right.append(capacity,label,state);row.append(avatar,left,right);list.append(row);
+ }
+ if(!list.children.length){const empty=document.createElement('div');empty.className='guest-empty';empty.textContent=passes.length?'No hay pases que coincidan.':'Todavía no hay invitados registrados.';list.append(empty);}
 }
+document.querySelectorAll<HTMLButtonElement>('[data-guest-filter]').forEach(button=>button.addEventListener('click',()=>{
+ guestFilter=button.dataset.guestFilter||'all';
+ document.querySelectorAll<HTMLButtonElement>('[data-guest-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+ render();
+}));
 async function api(action:string,extra:Record<string,unknown>={}){
  const response=await fetch('/api/operator',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',cache:'no-store',body:JSON.stringify({folio,action,...extra})});
  const data=await response.json();
