@@ -38,7 +38,7 @@ async function authState(){
  if(order!==sessionRefresh)return;
  if(permissionError || allowed!==true){
   show('dashboard',false);show('authScreen');
-  message('authMessage','Esta cuenta todavía no está autorizada. Comprueba que verificaste el correo del administrador.','error');
+  message('authMessage','Esta cuenta no tiene permisos de administrador.','error');
   return;
  }
  show('authScreen',false);show('dashboard');
@@ -120,25 +120,21 @@ async function doAction(action:string,id:string){
 }
 function connect(){
  const login=$('loginForm') as HTMLFormElement;
- login.addEventListener('submit',async(ev)=>{
+ login.addEventListener('submit',async ev=>{
   ev.preventDefault();if(!sb)return;
-  const email=($('loginEmail') as HTMLInputElement).value.trim();
+  const username=($('loginUsername') as HTMLInputElement).value.trim();
   const password=($('loginPassword') as HTMLInputElement).value;
-  const btn=$('loginButton') as HTMLButtonElement;btn.disabled=true;btn.textContent='Validando acceso...';
-  const {error}=await sb.auth.signInWithPassword({email,password});
-  btn.disabled=false;btn.textContent='Iniciar sesión →';
-  if(error)message('authMessage','No se pudo iniciar sesión. Si es tu primer acceso, solicita un enlace por correo.','error');
-  else {clearMessage('authMessage');await authState()}
- });
- $('magicLinkButton').addEventListener('click',async()=>{
-  if(!sb)return;
-  const email=($('loginEmail') as HTMLInputElement).value.trim().toLowerCase();
-  if(!email){message('authMessage','Escribe tu correo primero para recibir el enlace de acceso.','error');return;}
-  const btn=$('magicLinkButton') as HTMLButtonElement;btn.disabled=true;
-  const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+'/admin'}});
-  btn.disabled=false;
-  if(error)message('authMessage',error.message,'error');
-  else message('authMessage','Si el correo está autorizado y el servicio de email está configurado, recibirás un enlace para entrar. Revísalo en tu bandeja de entrada.','success');
+  const btn=$('loginButton') as HTMLButtonElement;btn.disabled=true;btn.textContent='Entrando...';
+  try{
+   const response=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password}),cache:'no-store'});
+   const payload=await response.json();
+   if(!response.ok||!payload.access_token||!payload.refresh_token)throw new Error('Usuario o contraseña incorrectos.');
+   const {error}=await sb.auth.setSession({access_token:payload.access_token,refresh_token:payload.refresh_token});
+   if(error)throw error;
+   ($('loginPassword') as HTMLInputElement).value='';
+   clearMessage('authMessage');await authState();
+  }catch(error){message('authMessage',error instanceof Error?error.message:'No se pudo iniciar sesión.','error')}
+  finally{btn.disabled=false;btn.textContent='Iniciar sesión →'}
  });
  $('signOut').addEventListener('click',async()=>{if(!sb)return;await sb.auth.signOut();events=[];await authState()});
  $('refresh').addEventListener('click',()=>void reload());

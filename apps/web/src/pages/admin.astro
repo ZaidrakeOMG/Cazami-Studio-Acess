@@ -28,13 +28,11 @@ const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
         <p class="muted">Inicia sesión con tu cuenta autorizada.</p>
         <div id="authMessage" class="message hidden" role="status" aria-live="polite"></div>
         <form id="loginForm" class="form-stack">
-          <label>Correo electrónico<input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="tu@correo.com" required /></label>
+          <label>Usuario<input id="loginUsername" name="username" type="text" autocomplete="username" placeholder="Usuario" required /></label>
           <label>Contraseña<input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required /></label>
           <button class="primary-button" type="submit" id="loginButton">Iniciar sesión <span aria-hidden="true">→</span></button>
         </form>
-        <div class="auth-divider"><span>PRIMER ACCESO</span></div>
-        <p class="muted small">Si aún no tienes la cuenta activada, solicita un enlace seguro a tu correo. Desde ese enlace podrás establecer tu contraseña.</p>
-        <button id="magicLinkButton" class="outline-button" type="button">Enviar enlace de primer acceso</button>
+        <p class="muted small" style="margin-top:22px">Acceso interno exclusivo para el administrador. Los códigos CA identifican eventos y no funcionan como contraseñas.</p>
         <p class="auth-footnote">El código de fiesta no es una contraseña. Únicamente el propietario autorizado puede administrar eventos.</p>
       </div>
     </section>
@@ -98,7 +96,7 @@ const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
 
         <section id="tabSettings" class="tab-panel hidden">
           <div class="page-heading"><div><div class="eyebrow">TU SEGURIDAD</div><h1>Mi cuenta</h1><p>Protege la administración de todas tus fiestas.</p></div></div>
-          <section class="section-card settings-card"><h2>Acceso del propietario</h2><p>La primera vez entra mediante el enlace enviado a tu correo. Aquí puedes establecer o cambiar tu contraseña para iniciar sesión normalmente después.</p><form id="passwordForm" class="form-stack"><label>Contraseña nueva<input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Mínimo 12 caracteres"/></label><button class="primary-button" type="submit">Guardar contraseña</button></form><div class="info-note">La contraseña no se guarda en este sitio: Supabase Auth la gestiona de forma segura. Recomendamos una contraseña nueva y única.</div></section>
+          <section class="section-card settings-card"><h2>Acceso del propietario</h2><p>Utiliza tu usuario y contraseña internos para entrar. Aquí puedes cambiar tu contraseña de administrador.</p><form id="passwordForm" class="form-stack"><label>Contraseña nueva<input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Mínimo 12 caracteres"/></label><button class="primary-button" type="submit">Guardar contraseña</button></form><div class="info-note">La contraseña no se guarda en este sitio: Supabase Auth la gestiona de forma segura. Recomendamos una contraseña nueva y única.</div></section>
           <section class="section-card settings-card"><h2>Depuración segura</h2><p>Los pases se eliminan automáticamente cuando vence el plazo elegido después de la fecha del evento. También puedes depurarlos manualmente desde el listado una vez que la fiesta haya terminado.</p><p class="helper-text">Se conservan el folio, nombre, URL y un resumen agregado. Los registros de acceso quedan disponibles para auditoría sin depender del nombre de la familia.</p></section>
         </section>
       </div>

@@ -19,14 +19,12 @@ Plataforma web de gestión de fiestas, invitaciones y folios, optimizada para te
 ## Supabase
 Se usa el proyecto Party-book autorizado expresamente por el propietario; todas las tablas nuevas empiezan con \`cazami_\`, y los procedimientos propios se alojan en \`cazami_internal\`. No se modificaron las tablas de invitaciones existentes.
 
-### Primer acceso
-1. En Supabase Auth, habilitar **email authentication** y **email confirmation**.
-2. Configurar como redirect URL \`https://cazami-studio-access.vercel.app/admin\` en Auth > URL Configuration. Verificar URL del sitio.
-3. Abrir \`/admin\`, escribir el correo administrador autorizado y pulsar «Enviar enlace de primer acceso».
-4. Abrir el enlace desde ese correo; después, en «Mi cuenta», establecer una contraseña nueva, única y segura.
-5. En futuros ingresos, usar correo y contraseña.
-
-**Advertencia:** nunca guardar contraseñas en archivos ni en GitHub. El correo administrador se verifica del lado de la base de datos; una sesión autenticada no implica privilegios si no está en la lista blanca y el email no está confirmado.
+### Inicio y Admin
+- Inicio: consulta de la fiesta mediante su folio CA-1; muestra únicamente nombre, estado y URL de la invitación.
+- Admin: usuario interno `admin` y contraseña de la cuenta existente de Supabase Auth, sin mostrar correo ni confirmación por correo.
+- El correo técnico está protegido en variables privadas de Vercel; no se almacena una contraseña en código.
+- Los usuarios deberán establecer una contraseña válida de manera segura si no la conocen.
+- El folio no autoriza gestión de pases; el generador y sus permisos se implementarán en la siguiente fase.
 
 ### Eventos
 - Se generan folios únicos CA-1, CA-2, CA-3...

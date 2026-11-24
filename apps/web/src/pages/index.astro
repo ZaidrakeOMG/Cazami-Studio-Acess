@@ -1,12 +1,30 @@
 ---
-const appName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
+const brand = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
 ---
 <!doctype html>
-<html lang="es">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="theme-color" content="#151321"/><link rel="icon" href="/favicon.svg" type="image/svg+xml"/><title>{appName}</title>
+<html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#151321"/><title>Inicio · {brand}</title>
 <style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 20%,#58356772,transparent 50%),#14111d;color:#f8f2ff;font-family:Inter,system-ui,-apple-system,sans-serif;display:grid;place-items:center;padding:24px}.card{border:1px solid #ffffff20;background:#ffffff0a;border-radius:27px;padding:clamp(30px,6vw,70px);max-width:730px;text-align:center;box-shadow:0 30px 100px #0006}.tag{display:inline-block;color:#d5ade9;border:1px solid #d5ade966;padding:9px 15px;border-radius:30px;font-size:11px;letter-spacing:.16em;font-weight:800}h1{font-size:clamp(40px,8vw,72px);letter-spacing:-.06em;line-height:1.05;margin:25px 0}h1 span{color:#ddb1ee}p{color:#bfb6ca;line-height:1.8;font-size:17px;max-width:510px;margin:0 auto 32px}a{display:inline-flex;justify-content:center;align-items:center;background:#d2aae9;color:#25152f;text-decoration:none;padding:15px 29px;min-height:48px;border-radius:13px;font-weight:800}footer{color:#8f849e;font-size:12px;margin-top:35px}
-</style>
-</head>
-<body><main class="card"><span class="tag">CAZAMI STUDIO · ACCESS</span><h1>Una entrada.<br/><span>Mil momentos.</span></h1><p>Administra eventos, folios y sus invitaciones digitales desde cualquier dispositivo.</p><a href="/admin">Entrar al panel administrativo →</a><footer>© {new Date().getFullYear()} CAZAMI Studio · Plataforma en desarrollo</footer></main></body>
-</html>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,system-ui,-apple-system,sans-serif;background:radial-gradient(ellipse at 80% 15%,#5c397c77,transparent 50%),#151220;color:#f8f3ff}.wrap{max-width:1060px;padding:22px 20px;margin:auto}nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:18px;border-bottom:1px solid #ffffff22}.brand{font-weight:900;letter-spacing:.1em;font-size:15px;color:white;text-decoration:none}.brand b{color:#d5a9ef}nav .menu{display:flex;gap:5px}nav .menu a{color:#e0d0eb;font-size:13px;text-decoration:none;padding:11px 15px;border-radius:10px;font-weight:700}nav .menu a[aria-current]{background:#ffffff18;color:white}main{display:grid;place-items:center;min-height:75vh;padding:70px 0}.hero{max-width:640px;width:100%;text-align:center}.eyebrow{color:#d6b0ed;letter-spacing:.15em;font-size:11px;font-weight:800;border:1px solid #d6b0ed55;border-radius:99px;display:inline-block;padding:10px 15px}h1{font-size:clamp(46px,8vw,79px);letter-spacing:-.065em;line-height:1.06;margin:23px 0 16px}h1 em{font-style:normal;background:linear-gradient(110deg,#ecc6e9,#b7a7ec);color:transparent;background-clip:text}p{color:#b7aaba;font-size:16px;line-height:1.7;max-width:500px;margin:0 auto 29px}.entry{padding:25px;border:1px solid #ffffff22;border-radius:21px;background:#ffffff09;box-shadow:0 32px 80px #09081066;text-align:left}.entry label{display:block;font-size:13px;font-weight:800;margin-bottom:10px}.fields{display:flex;gap:10px}.fields input{flex:1;min-width:0;min-height:54px;border:1px solid #ffffff31;background:#ffffff11;border-radius:11px;padding:13px 16px;color:white;font-weight:800;font-size:18px;text-transform:uppercase;outline:none}.fields input:focus{border-color:#e1baf2}.fields input::placeholder{color:#776b86}.fields button{min-height:54px;border:0;padding:12px 25px;border-radius:11px;background:#d9b6ef;color:#2a1837;font-weight:900;font-size:14px;cursor:pointer}.entry small{color:#988aab;font-size:12px;display:block;margin-top:13px;line-height:1.5}.result{margin-top:17px;background:#ffffff0c;border:1px solid #ffffff24;border-radius:16px;padding:23px;text-align:left}.result.error{border-color:#ba6470;color:#ffd4d8}.result h2{font-size:22px;margin:9px 0}.result a{display:inline-block;margin-top:15px;color:#e7c1f8;font-size:14px;font-weight:800}.result .folio{color:#d5b0ed;font-size:12px;font-weight:900}.result .status{color:#a99cb7;font-size:13px}.hidden{display:none}footer{color:#94889e;font-size:12px;text-align:center;padding:23px 0;border-top:1px solid #ffffff16}@media(max-width:470px){.fields{flex-direction:column}.fields button{width:100%}.entry{padding:19px}.brand{font-size:12px}nav .menu a{padding:10px 12px}}
+</style></head><body><div class="wrap"><nav><a href="/" class="brand">CAZAMI <b>ACCESS</b></a><div class="menu"><a href="/" aria-current="page">Inicio</a><a href="/admin">Admin</a></div></nav>
+<main><section class="hero"><span class="eyebrow">ACCESO A EVENTOS</span><h1>Ingresa tu <em>código</em></h1><p>Escribe el folio que te proporcionaron para consultar la fiesta y su invitación digital.</p>
+<form id="lookup" class="entry"><label for="code">Código del evento</label><div class="fields"><input id="code" type="text" maxlength="20" placeholder="CA-1" autocapitalize="characters" autocomplete="off" spellcheck="false" required/><button id="send" type="submit">Ingresar</button></div><small>Por ejemplo CA-1. El folio no permite administrar pases o cambiar información.</small></form><div id="result" class="result hidden" role="status" aria-live="polite"></div>
+</section></main><footer>© {new Date().getFullYear()} CAZAMI Studio · Pases QR y control de acceso</footer></div>
+<script>
+const form=document.getElementById('lookup'),input=document.getElementById('code'),out=document.getElementById('result'),button=document.getElementById('send');
+const escapeHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function error(text){out.classList.remove('hidden');out.classList.add('error');out.textContent=text}
+form.addEventListener('submit',async e=>{
+ e.preventDefault();const folio=input.value.trim().toUpperCase();
+ if(!/^CA-[1-9][0-9]{0,10}$/.test(folio)){error('Escribe un código válido, por ejemplo CA-1.');return}
+ button.disabled=true;button.textContent='Buscando...';out.classList.add('hidden');out.classList.remove('error');
+ try{
+  const response=await fetch('/api/event/'+encodeURIComponent(folio),{cache:'no-store'});
+  const data=await response.json();
+  if(!response.ok)throw Error(data.error||'No se encontró el código.');
+  out.classList.remove('hidden');
+  out.innerHTML='<div class="folio">'+escapeHtml(data.folio)+'</div><h2>'+escapeHtml(data.event_name)+'</h2><div class="status">'+escapeHtml(data.status_label)+'</div>';
+  if(data.invitation_url){const a=document.createElement('a');a.textContent='Abrir invitación';a.href=data.invitation_url;a.target='_blank';a.rel='noopener noreferrer';out.append(a)}
+ }catch(e){error(e.message||'No se pudo consultar el evento.')}
+ finally{button.disabled=false;button.textContent='Ingresar'}
+});
+</script></body></html>
