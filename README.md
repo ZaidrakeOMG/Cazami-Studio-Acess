@@ -1,47 +1,47 @@
-# Cazami-Studio-Acess
+# CAZAMI Access
 
-**CAZAMI Access** es una plataforma comercial para generación de pases QR y control de acceso a eventos.
+Plataforma web de gestión de fiestas, invitaciones y folios, optimizada para teléfonos Android y computadoras.
 
-> Estado: arquitectura aprobada para planificación; implementación pendiente.
+## Estado
+**Fase actual:** panel administrativo, folios CA, asociación de invitaciones e historial de limpieza. El generador QR y la aplicación Flutter son fases futuras.
 
 ## Stack
-- Astro + TypeScript: plataforma web de superadministrador, clientes y pases públicos
-- Flutter: aplicación de control de acceso Android/iOS
-- Supabase: Auth, PostgreSQL, RLS, Storage, Realtime y funciones del servidor
-- Vercel: despliegue web
-- GitHub: control de versiones y CI
+- Astro 7 y Vercel
+- Supabase Auth, Postgres RLS y pg_cron
+- Flutter Android/iOS (pendiente)
 
-## Módulos proyectados
-1. Superadministrador, clientes, paquetes y pagos
-2. Eventos con aislamiento por cliente y roles
-3. Invitados, mesas, pases y QR seguros
-4. Diseño, descarga y compartición de pases
-5. Escáner móvil con control de aforo parcial
-6. Registro de ingresos atómico, bitácora e informes en tiempo real
-7. Seguridad, pruebas, supervisión y despliegue
+## Estructura
+- apps/web/src/pages/admin.astro: acceso y panel administrativo
+- apps/web/src/scripts/admin.ts: Auth, consultas y eventos
+- apps/web/src/styles/admin.css: diseño responsive, mobile-first
+- supabase/: documentación y migraciones
 
-## Reglas de seguridad
-- **No usar el proyecto Supabase Party-book** para este producto; se creará uno independiente.
-- No versionar contraseñas, tokens, claves privadas ni archivos `.env` reales.
-- No exponer claves `service_role` en navegadores ni aplicaciones móviles.
-- Autorización basada en Auth + RLS y membresía por evento; un código de fiesta no es una contraseña.
-- Confirmar ingresos mediante transacciones atómicas e idempotentes.
-- Escanear no implica registrar un ingreso; el operador debe confirmarlo.
-- El modo offline no confirmará ingresos sin una estrategia segura contra duplicados.
+## Supabase
+Se usa el proyecto Party-book autorizado expresamente por el propietario; todas las tablas nuevas empiezan con \`cazami_\`, y los procedimientos propios se alojan en \`cazami_internal\`. No se modificaron las tablas de invitaciones existentes.
 
-## Fases
-1. Arquitectura y base de datos
-2. Panel de superadministrador
-3. Panel de cliente
-4. Generador y diseñador de pases
-5. Aplicación Flutter
-6. Validaciones y sincronización Realtime
-7. Seguridad y pruebas
-8. Publicación y comercialización
+### Primer acceso
+1. En Supabase Auth, habilitar **email authentication** y **email confirmation**.
+2. Configurar como redirect URL \`https://cazami-studio-access.vercel.app/admin\` en Auth > URL Configuration. Verificar URL del sitio.
+3. Abrir \`/admin\`, escribir el correo administrador autorizado y pulsar «Enviar enlace de primer acceso».
+4. Abrir el enlace desde ese correo; después, en «Mi cuenta», establecer una contraseña nueva, única y segura.
+5. En futuros ingresos, usar correo y contraseña.
 
-## Próximos pasos
-- Crear un proyecto Supabase independiente para CAZAMI Access.
-- Establecer estructura de carpetas, migraciones y pruebas.
-- Desarrollar la primera versión funcional y verificar aislamiento por evento.
+**Advertencia:** nunca guardar contraseñas en archivos ni en GitHub. El correo administrador se verifica del lado de la base de datos; una sesión autenticada no implica privilegios si no está en la lista blanca y el email no está confirmado.
 
-© CAZAMI Studio. Todos los derechos reservados.
+### Eventos
+- Se generan folios únicos CA-1, CA-2, CA-3...
+- Cada evento conserva nombre, URL HTTPS de la invitación, cliente, fecha, límites y estado.
+- Se pueden crear, editar, finalizar y consultar desde Android y PC.
+- El folio CA-1 está vinculado a la invitación de Paula. Falta configurar su fecha.
+- La limpieza manual está restringida a después de la fecha del evento y requiere escribir el folio de confirmación.
+- La limpieza automática está programada diariamente en Supabase pg_cron; usa \`retention_days\` (predeterminado 30) y actúa solamente sobre tablas CAZAMI. El folio queda como historial.
+
+## Privacidad y seguridad
+- Auth y RLS son los controles reales; nunca confiar en verificar el correo solo en JavaScript.
+- Las claves secretas no se usan en navegador o móvil.
+- Aún NO habilitar acceso de clientes ni escáner antes de añadir roles y operaciones atómicas.
+- Solo la lista blanca de administración puede gestionar eventos.
+- Antes de uso comercial: revisar política de retención de datos, respaldos y pruebas de concurrencia.
+
+## Próximas fases
+Crear generador QR asociado al UUID interno del evento (no solo al folio), control de cupos y pases, y aplicación Flutter con confirmación atómica de accesos.

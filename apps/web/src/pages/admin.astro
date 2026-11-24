@@ -1,0 +1,126 @@
+---
+import '../styles/admin.css';
+const brandName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
+---
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#12101c"/>
+  <meta name="description" content="Administración de eventos y folios CAZAMI Access"/>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+  <title>Administración · {brandName}</title>
+</head>
+<body>
+  <div id="bootScreen" class="boot-screen"><div class="spinner"></div><p>Preparando CAZAMI Access...</p></div>
+
+  <main id="authScreen" class="auth-screen hidden">
+    <section class="auth-hero">
+      <a class="wordmark" href="/"><span class="brand-mark">C</span><span>CAZAMI <b>ACCESS</b></span></a>
+      <div class="auth-hero-copy"><div class="eyebrow">CONTROL DE EVENTOS</div><h1>Todo tu evento,<br><em>bajo control.</em></h1><p>Administra las fiestas, sus folios y sus invitaciones desde tu teléfono o computadora.</p><div class="auth-features"><span>Folios únicos CA-1, CA-2...</span><span>Invitaciones vinculadas</span><span>Historial permanente</span></div></div>
+      <div class="hero-footer">CAZAMI Studio · Acceso administrativo</div>
+    </section>
+    <section class="auth-side">
+      <div class="auth-card">
+        <span class="tag">ÁREA PRIVADA</span>
+        <h2>Bienvenido de nuevo</h2>
+        <p class="muted">Inicia sesión con tu cuenta autorizada.</p>
+        <div id="authMessage" class="message hidden" role="status" aria-live="polite"></div>
+        <form id="loginForm" class="form-stack">
+          <label>Correo electrónico<input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="tu@correo.com" required /></label>
+          <label>Contraseña<input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required /></label>
+          <button class="primary-button" type="submit" id="loginButton">Iniciar sesión <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="auth-divider"><span>PRIMER ACCESO</span></div>
+        <p class="muted small">Si aún no tienes la cuenta activada, solicita un enlace seguro a tu correo. Desde ese enlace podrás establecer tu contraseña.</p>
+        <button id="magicLinkButton" class="outline-button" type="button">Enviar enlace de primer acceso</button>
+        <p class="auth-footnote">El código de fiesta no es una contraseña. Únicamente el propietario autorizado puede administrar eventos.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="dashboard" class="dashboard hidden">
+    <aside class="sidebar">
+      <a class="wordmark" href="/" aria-label="Inicio"><span class="brand-mark">C</span><span>CAZAMI <b>ACCESS</b></span></a>
+      <div class="sidebar-label">CONTROL CENTER</div>
+      <nav aria-label="Secciones" class="sidebar-nav">
+        <button class="nav-link active" data-tab="events"><span class="nav-symbol">▦</span> Mis fiestas</button>
+        <button class="nav-link" data-tab="history"><span class="nav-symbol">◷</span> Historial</button>
+        <button class="nav-link" data-tab="settings"><span class="nav-symbol">⚙</span> Mi cuenta</button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-identity"><span class="avatar">A</span><span><b>Administrador</b><small id="userEmail">—</small></span></div>
+      <button class="logout-button" id="signOut" type="button">Cerrar sesión</button>
+    </aside>
+    <div class="main-area">
+      <header class="topbar"><div class="mobile-brand"><span class="brand-mark">C</span><strong>CAZAMI <span>ACCESS</span></strong></div><div class="topbar-title">PANEL ADMINISTRATIVO</div><div class="topbar-right"><span class="connection-dot"></span><span>Conectado a Supabase</span><button class="icon-button" id="refresh" title="Actualizar fiestas" aria-label="Actualizar fiestas">↻</button></div></header>
+      <div class="content">
+        <div id="dashboardMessage" class="message hidden" role="status" aria-live="polite"></div>
+        <section id="tabEvents" class="tab-panel">
+          <div class="page-heading"><div><div class="eyebrow">TUS EVENTOS</div><h1>Mis fiestas</h1><p>Una fiesta, un folio único, una invitación vinculada.</p></div><span class="heading-label">GESTIÓN DE EVENTOS</span></div>
+          <div class="stats">
+            <div class="stat"><small>FIESTAS REGISTRADAS</small><strong id="statAll">0</strong><span>Total de folios creados</span></div>
+            <div class="stat"><small>FIESTAS ACTIVAS</small><strong id="statActive">0</strong><span>Eventos en operación</span></div>
+            <div class="stat"><small>FOLIOS HISTÓRICOS</small><strong id="statArchived">0</strong><span>Registros conservados</span></div>
+          </div>
+          <div class="workspace">
+            <section class="section-card create-panel">
+              <div class="section-head"><span class="section-icon">＋</span><div><h2>Crear fiesta</h2><p>El folio CA se asigna automáticamente</p></div></div>
+              <form id="createEventForm" class="form-stack">
+                <label>Nombre del evento <span class="required">*</span><input name="event_name" maxlength="160" placeholder="Ej. XV de Valentina" required minlength="2"/></label>
+                <label>Nombre del cliente <input name="client_name" maxlength="160" placeholder="Ej. Familia García"/></label>
+                <label>Tipo de evento<select name="event_type"><option>XV años</option><option>Boda</option><option>Baby shower</option><option>Graduación</option><option>Cumpleaños</option><option>Evento empresarial</option><option>Otro</option></select></label>
+                <label>URL de la invitación <span class="required">*</span><input name="invitation_url" type="url" placeholder="https://mi-invitacion.com/" required pattern="https://.*"/></label>
+                <label>Fecha de la fiesta <span class="optional">(puede definirse después)</span><input name="event_date" type="date" /></label>
+                <div class="inline-fields">
+                  <label>Máx. pases<input name="max_passes" type="number" min="1" max="100000" value="100" required/></label>
+                  <label>Máx. personas<input name="max_people" type="number" min="1" max="1000000" value="300" required/></label>
+                </div>
+                <label>Limpiar pases después de<select name="retention_days"><option value="7">7 días</option><option value="15">15 días</option><option value="30" selected>30 días</option><option value="60">60 días</option><option value="90">90 días</option></select></label>
+                <p class="info-note">El folio queda guardado para siempre. Únicamente los pases temporales se depuran al vencer el plazo.</p>
+                <button type="submit" class="primary-button" id="createButton">Crear fiesta y asignar folio <span aria-hidden="true">→</span></button>
+              </form>
+            </section>
+            <section class="section-card list-panel">
+              <div class="list-heading"><div><h2>Folios registrados</h2><p>Cada folio está asociado con una invitación</p></div><div class="count-pill" id="listCount">0 fiestas</div></div>
+              <div class="search-control"><span aria-hidden="true">⌕</span><input type="search" id="searchEvents" placeholder="Buscar folio, fiesta o cliente..." aria-label="Buscar fiestas"/></div>
+              <div id="eventList" class="event-list"><p class="empty-msg">Cargando eventos...</p></div>
+              <p class="helper-text">El generador de pases estará conectado internamente por el ID de la fiesta y mostrará el folio como referencia.</p>
+            </section>
+          </div>
+        </section>
+
+        <section id="tabHistory" class="tab-panel hidden">
+          <div class="page-heading"><div><div class="eyebrow">ARCHIVO PERMANENTE</div><h1>Historial</h1><p>Conserva los folios aunque los pases del evento hayan sido depurados.</p></div></div>
+          <section class="section-card"><div class="list-heading"><div><h2>Eventos finalizados</h2><p>La información de cada fiesta queda rastreable</p></div></div><div id="historicalList" class="event-list"></div></section>
+        </section>
+
+        <section id="tabSettings" class="tab-panel hidden">
+          <div class="page-heading"><div><div class="eyebrow">TU SEGURIDAD</div><h1>Mi cuenta</h1><p>Protege la administración de todas tus fiestas.</p></div></div>
+          <section class="section-card settings-card"><h2>Acceso del propietario</h2><p>La primera vez entra mediante el enlace enviado a tu correo. Aquí puedes establecer o cambiar tu contraseña para iniciar sesión normalmente después.</p><form id="passwordForm" class="form-stack"><label>Contraseña nueva<input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="Mínimo 12 caracteres"/></label><button class="primary-button" type="submit">Guardar contraseña</button></form><div class="info-note">La contraseña no se guarda en este sitio: Supabase Auth la gestiona de forma segura. Recomendamos una contraseña nueva y única.</div></section>
+          <section class="section-card settings-card"><h2>Depuración segura</h2><p>Los pases se eliminan automáticamente cuando vence el plazo elegido después de la fecha del evento. También puedes depurarlos manualmente desde el listado una vez que la fiesta haya terminado.</p><p class="helper-text">Se conservan el folio, nombre, URL y un resumen agregado. Los registros de acceso quedan disponibles para auditoría sin depender del nombre de la familia.</p></section>
+        </section>
+      </div>
+    </div>
+    <nav class="bottom-nav" aria-label="Navegación móvil"><button data-tab="events" class="active"><span>▦</span>Fiestas</button><button data-tab="history"><span>◷</span>Historial</button><button data-tab="settings"><span>⚙</span>Cuenta</button></nav>
+  </div>
+
+  <dialog id="editDialog" class="edit-dialog">
+    <form id="editEventForm" class="form-stack">
+      <div class="dialog-head"><div><span class="tag">EDITAR FIESTA</span><h2 id="dialogFolio">CA-</h2></div><button type="button" class="icon-button close-dialog" aria-label="Cerrar">×</button></div>
+      <input type="hidden" name="id"/>
+      <label>Nombre del evento<input name="event_name" required minlength="2"/></label>
+      <label>Cliente<input name="client_name"/></label>
+      <label>Tipo de evento<select name="event_type"><option>XV años</option><option>Boda</option><option>Baby shower</option><option>Graduación</option><option>Cumpleaños</option><option>Evento empresarial</option><option>Otro</option></select></label>
+      <label>URL de la invitación<input type="url" name="invitation_url" required/></label>
+      <label>Fecha de la fiesta<input name="event_date" type="date"/></label>
+      <label>Estado<select name="status"><option value="draft">En preparación</option><option value="active">Activa</option><option value="paused">Suspendida</option><option value="finished">Finalizada</option></select></label>
+      <div class="inline-fields"><label>Máx. pases<input name="max_passes" type="number" min="1" max="100000"/></label><label>Máx. personas<input name="max_people" type="number" min="1" max="1000000"/></label></div>
+      <label>Depurar pases después de<select name="retention_days"><option value="7">7 días</option><option value="15">15 días</option><option value="30">30 días</option><option value="60">60 días</option><option value="90">90 días</option></select></label>
+      <button type="submit" class="primary-button">Guardar cambios</button>
+    </form>
+  </dialog>
+  <script>import '../scripts/admin.ts';</script>
+</body>
+</html>

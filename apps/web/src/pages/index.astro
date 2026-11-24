@@ -3,62 +3,10 @@ const appName = import.meta.env.PUBLIC_APP_NAME || 'CAZAMI Access';
 ---
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="CAZAMI Access: futura plataforma de pases QR y control de acceso a eventos." />
-    <meta name="theme-color" content="#151321" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>{appName} · Pases QR y control de acceso</title>
-    <style>
-      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #151321; color: #f5f1fb; }
-      * { box-sizing: border-box; }
-      body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse 850px 500px at 80% 10%, #6a366a45 0%, transparent 65%), radial-gradient(ellipse 750px 500px at 15% 100%, #4d417d35 0%, transparent 72%), #151321; }
-      .wrap { max-width: 1200px; margin: 0 auto; padding: 32px clamp(20px,5vw,64px) 64px; }
-      header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-      .brand { display: flex; align-items: center; gap: 13px; font-size: 15px; letter-spacing: .12em; font-weight: 800; }
-      .mark { display:grid; place-items:center; width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, #b68de9, #e9b8d5); color:#20172e; font-size: 26px; }
-      .pill { display:inline-block; padding: 9px 15px; border: 1px solid #ac91c955; border-radius: 100px; color:#e1caec; font-size: 12px; letter-spacing:.05em; background:#ffffff09; }
-      main { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(32px,6vw,100px); align-items: center; min-height: min(78vh, 750px); padding: 65px 0 50px; }
-      .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:13px; color:#d9b5f3; font-weight:700; letter-spacing:.15em; text-transform:uppercase; }
-      .eyebrow::before { content:""; width:28px; height:1px; background:#d9b5f3; }
-      h1 { font-size: clamp(47px, 6.5vw, 90px); line-height: 1.04; letter-spacing: -.065em; margin: 26px 0; font-weight: 720; }
-      h1 em { font-style:normal; background: linear-gradient(110deg,#dac0fb,#f0b8d5); background-clip:text; -webkit-background-clip:text; color:transparent; }
-      p { color:#bbb5c9; line-height:1.8; font-size:clamp(16px,1.5vw,19px); max-width:590px; }
-      .note { margin-top:30px; border-left: 3px solid #b991e9; background:#ffffff09; padding:16px 20px; border-radius: 0 14px 14px 0; font-size:14px; color:#d2cedd; max-width:590px; line-height:1.7; }
-      .panel { border:1px solid #ffffff21; background:linear-gradient(155deg,#282239cc,#171521ee); box-shadow:0 30px 100px #09081488; border-radius:28px; padding:clamp(22px,3vw,40px); position:relative; }
-      .panel::before { content:""; position:absolute; inset:-1px; border-radius:28px; border:1px solid #d6b2e32d; pointer-events:none; }
-      .panel-heading { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#c6b9d8; text-transform:uppercase; letter-spacing:.12em; font-weight:700; padding-bottom:25px; border-bottom:1px solid #ffffff16; }
-      .card { display:flex; align-items:center; gap:16px; padding:22px 0; border-bottom:1px solid #ffffff16; }
-      .card:last-child { border:0; padding-bottom:0; }
-      .icon { display:grid; place-items:center; flex:none; height:50px; width:50px; border-radius:15px; background:#a57ac51b; color:#efcbed; font-size:21px; }
-      .label { font-weight:700; font-size:16px; }
-      .desc { font-size:13px; color:#aaa1ba; padding-top:6px; line-height:1.4; }
-      footer { display:flex; justify-content:space-between; gap:20px; border-top:1px solid #ffffff18; padding-top:23px; color:#8f879c; font-size:12px; }
-      @media(max-width:780px) { header { align-items:flex-start; } main { grid-template-columns:1fr; padding-top:70px; min-height:auto; gap:36px; } h1{ font-size:clamp(46px,13vw,69px); } .panel { max-width:600px; } footer { flex-direction:column; gap:8px; } }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <header>
-        <div class="brand"><span class="mark" aria-hidden="true">C</span> CAZAMI <span style="color:#dbb7ef">ACCESS</span></div>
-        <span class="pill">Plataforma en desarrollo</span>
-      </header>
-      <main>
-        <section>
-          <div class="eyebrow">CAZAMI Studio</div>
-          <h1>Una entrada.<br /><em>Mil momentos.</em></h1>
-          <p>Estamos preparando una plataforma profesional para generar pases QR, administrar invitados y controlar el acceso a eventos con seguridad.</p>
-          <div class="note"><strong>Estado real del proyecto:</strong> esta es la página inicial. Los paneles, autenticación, emisión de pases y escáner todavía no están habilitados.</div>
-        </section>
-        <section class="panel" aria-label="Módulos planeados">
-          <div class="panel-heading"><span>Próximos módulos</span><span>01 / 03</span></div>
-          <div class="card"><span class="icon" aria-hidden="true">◈</span><div><div class="label">Panel de eventos</div><div class="desc">Clientes, fiestas, roles y paquetes</div></div></div>
-          <div class="card"><span class="icon" aria-hidden="true">▦</span><div><div class="label">Pases QR</div><div class="desc">Invitados, diseños y enlaces seguros</div></div></div>
-          <div class="card"><span class="icon" aria-hidden="true">✓</span><div><div class="label">Control de acceso</div><div class="desc">Entradas parciales y registro en tiempo real</div></div></div>
-        </section>
-      </main>
-      <footer><span>© {new Date().getFullYear()} CAZAMI Studio</span><span>Infraestructura inicial · Astro + Vercel</span></footer>
-    </div>
-  </body>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="theme-color" content="#151321"/><link rel="icon" href="/favicon.svg" type="image/svg+xml"/><title>{appName}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 20%,#58356772,transparent 50%),#14111d;color:#f8f2ff;font-family:Inter,system-ui,-apple-system,sans-serif;display:grid;place-items:center;padding:24px}.card{border:1px solid #ffffff20;background:#ffffff0a;border-radius:27px;padding:clamp(30px,6vw,70px);max-width:730px;text-align:center;box-shadow:0 30px 100px #0006}.tag{display:inline-block;color:#d5ade9;border:1px solid #d5ade966;padding:9px 15px;border-radius:30px;font-size:11px;letter-spacing:.16em;font-weight:800}h1{font-size:clamp(40px,8vw,72px);letter-spacing:-.06em;line-height:1.05;margin:25px 0}h1 span{color:#ddb1ee}p{color:#bfb6ca;line-height:1.8;font-size:17px;max-width:510px;margin:0 auto 32px}a{display:inline-flex;justify-content:center;align-items:center;background:#d2aae9;color:#25152f;text-decoration:none;padding:15px 29px;min-height:48px;border-radius:13px;font-weight:800}footer{color:#8f849e;font-size:12px;margin-top:35px}
+</style>
+</head>
+<body><main class="card"><span class="tag">CAZAMI STUDIO · ACCESS</span><h1>Una entrada.<br/><span>Mil momentos.</span></h1><p>Administra eventos, folios y sus invitaciones digitales desde cualquier dispositivo.</p><a href="/admin">Entrar al panel administrativo →</a><footer>© {new Date().getFullYear()} CAZAMI Studio · Plataforma en desarrollo</footer></main></body>
 </html>
